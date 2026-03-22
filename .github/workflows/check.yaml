@@ -1,0 +1,35 @@
+name: Willhaben Watcher
+
+on:
+  schedule:
+    - cron: '*/20 * * * *' # Every 20 minutes
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run script
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: python willhaben_bot.py
+
+      - name: Commit state
+        run: |
+          git config --global user.name 'WillhabenBot'
+          git config --global user.email 'bot@github.com'
+          git add seen_ids.txt
+          git commit -m "Update seen items" || exit 0
+          git push
