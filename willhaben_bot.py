@@ -6,7 +6,7 @@ import time
 # Use the exact base URL from your successful fetch
 SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/kaufen-und-verkaufen/marktplatz/a/farbe-schwarz-3201"
 # API for item details
-DETAIL_API_URL = "https://publicapi.willhaben.at/atdetail/v1/"
+DETAIL_API_URL = "https://www.willhaben.at/webapi/iad/atdetail/"
 
 HEADERS = {
     "accept": "application/json",
@@ -31,15 +31,28 @@ def send_telegram(message):
     requests.post(url, json=payload, timeout=10)
 
 def get_full_description(ad_id):
-    """Fetches the full description for a specific ad ID."""
+    """Fetches the detail JSON and extracts the long description text."""
     try:
-        response = requests.get(f"{DETAIL_API_URL}{ad_id}", headers=HEADERS, timeout=10)
+        # We append the ID to the webapi detail path
+        url = f"{DETAIL_API_URL}{ad_id}"
+        response = requests.get(url, headers=HEADERS, timeout=10)
+        
         if response.status_code == 200:
             data = response.json()
-            # Extract description from attributes or description field
-            return data.get("description", "").lower()
-    except:
-        return ""
+            # In the detail API, the text is usually in 'description' 
+            # or within the attribute list under 'BODY_DYN'
+            description_text = data.get("description", "")
+            
+            # If 'description' is short/empty, check attributes
+            if not description_text:
+                attrs = data.get("attributes", {}).get("attribute", [])
+                for a in attrs:
+                    if a.get("name") == "BODY_DYN":
+                        description_text = " ".join(a.get("values", []))
+            
+            return description_text.lower()
+    except Exception as e:
+        print(f"DEBUG: Could not fetch details for {ad_id}: {e}")
     return ""
 
 def main():
