@@ -2,7 +2,7 @@ import requests
 import os
 import sys
 
-# --- UPDATED CONFIGURATION ---
+# --- CONFIGURATION ---
 API_URL = "https://www.willhaben.at/iad/searchmarket/api/v1/search"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -13,7 +13,24 @@ HEADERS = {
     "Referer": "https://www.willhaben.at/"
 }
 
-# ... (keep your PARAMS and other functions as they were) ...
+# The parameters from your URL
+PARAMS = {
+    "rows": 30,
+    "areaId": 900,         # Vienna
+    "keyword": "tv bank",
+    "attribute": ["farbe:schwarz"],
+    "isNavigation": "true"
+}
+
+KEYWORDS = ["160x", "160 cm", "breite 160", "x160"] # Add more as needed
+TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
+CHAT_ID = os.getenv("TG_CHAT_ID")
+
+def send_telegram(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    requests.post(url, json=payload)
+
 
 def main():
     # 1. Load seen IDs
