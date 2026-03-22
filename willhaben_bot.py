@@ -94,5 +94,5 @@ def main():
             for nid in new_ids_to_save:
                 f.write(nid + "\n")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
