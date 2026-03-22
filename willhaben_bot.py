@@ -87,5 +87,5 @@ def main():
                 f.write(ni + "\n")
         print(f"Success: Processed {len(new_ids)} new items.")
 
-if _name_ == "__main__":
+if __name__ == "__main__":
     main()
