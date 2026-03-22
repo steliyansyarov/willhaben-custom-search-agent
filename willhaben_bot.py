@@ -1,24 +1,26 @@
-import requests
+import sys
 import os
-import time
+
+# --- 1. GLOBAL TEST ---
+print(">>> SCRIPT LOADED SUCCESSFULLY", flush=True)
+
+try:
+    import requests
+    import time
+    import random
+    print(">>> LIBRARIES IMPORTED", flush=True)
+except Exception as e:
+    print(f">>> IMPORT ERROR: {e}", flush=True)
+    sys.exit(1)
 
 # --- CONFIGURATION ---
-# Use the exact base URL from your successful fetch
 SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/kaufen-und-verkaufen/marktplatz/a/farbe-schwarz-3201"
-# API for item details
 DETAIL_API_URL = "https://www.willhaben.at/webapi/iad/atdetail/"
 
 HEADERS = {
     "accept": "application/json",
     "x-wh-client": "api@willhaben.at;responsive_web;server;1.0.0;phone",
-    "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile Safari/537.36"
-}
-
-PARAMS = {
-    "areaId": "900",
-    "keyword": "tv bank",
-    "rows": "30",
-    "isNavigation": "true"
+    "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile"
 }
 
 KEYWORDS = ["160x", "160 cm", "breite 160"]
@@ -26,87 +28,59 @@ TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
 CHAT_ID = os.getenv("TG_CHAT_ID")
 
 def send_telegram(message):
+    print(f">>> Attempting to send Telegram message...", flush=True)
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    response = requests.post(url, json=payload, timeout=10)
-    print(f"DEBUG Telegram: Status {response.status_code}, Response: {response.text}")
-
-def get_full_description(ad_id):
-    """Fetches the detail JSON and extracts the long description text."""
-    try:
-        # We append the ID to the webapi detail path
-        url = f"{DETAIL_API_URL}{ad_id}"
-        response = requests.get(url, headers=HEADERS, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            # In the detail API, the text is usually in 'description' 
-            # or within the attribute list under 'BODY_DYN'
-            description_text = data.get("description", "")
-            
-            # If 'description' is short/empty, check attributes
-            if not description_text:
-                attrs = data.get("attributes", {}).get("attribute", [])
-                for a in attrs:
-                    if a.get("name") == "BODY_DYN":
-                        description_text = " ".join(a.get("values", []))
-            
-            return description_text.lower()
-    except Exception as e:
-        print(f"DEBUG: Could not fetch details for {ad_id}: {e}")
-    return ""
+    res = requests.post(url, json=payload, timeout=10)
+    print(f">>> Telegram Response: {res.status_code} - {res.text[:50]}", flush=True)
 
 def main():
-    # 1. Load seen IDs
-    if os.path.exists("seen_ids.txt"):
-        with open("seen_ids.txt", "r") as f:
-            seen_ids = set(f.read().splitlines())
-    else:
-        seen_ids = set()
+    print(">>> ENTERING MAIN FUNCTION", flush=True)
+    
+    # 1. Secret Check (Don't print the actual token!)
+    if not TELEGRAM_TOKEN or not CHAT_ID:
+        print(">>> ERROR: Telegram Secrets are missing!", flush=True)
+        return
 
-    # 2. Fetch Search Results
-    response = requests.get(SEARCH_API_URL, params=PARAMS, headers=HEADERS)
+    # 2. Fetch Search
+    print(f">>> Fetching search results from Willhaben...", flush=True)
+    params = {"areaId": "900", "keyword": "tv bank", "rows": "30", "isNavigation": "true"}
+    
+    response = requests.get(SEARCH_API_URL, params=params, headers=HEADERS, timeout=15)
+    print(f">>> Search API Status: {response.status_code}", flush=True)
+    
     if response.status_code != 200:
-        print(f"Search failed with status {response.status_code}")
         return
 
     data = response.json()
     ads = data.get("advertSummaryList", {}).get("advertSummary", [])
-    
-    new_ids_to_save = []
+    print(f">>> Found {len(ads)} total ads in search.", flush=True)
 
+    # 3. Seen IDs Logic
+    seen_ids = set()
+    if os.path.exists("seen_ids.txt"):
+        with open("seen_ids.txt", "r") as f:
+            seen_ids = set(f.read().splitlines())
+    print(f">>> Known IDs in memory: {len(seen_ids)}", flush=True)
+
+    # 4. Processing
+    new_count = 0
     for ad in ads:
         ad_id = str(ad.get("id"))
-        
         if ad_id not in seen_ids:
-            # Step 3: Get full description for the keyword check
-            full_desc = get_full_description(ad_id)
-            title = ad.get("description", "").lower() # In search results, 'description' is often the title
-            
-            if any(k in full_desc for k in KEYWORDS) or any(k in title for k in KEYWORDS):
-                price = "N/A"
-                # Find price in attributes
-                for attr in ad.get("attributes", {}).get("attribute", []):
-                    if attr.get("name") == "PRICE_FOR_DISPLAY":
-                        price = attr.get("values", ["N/A"])[0]
-                
-                seo_path = ""
-                for attr in ad.get("attributes", {}).get("attribute", []):
-                    if attr.get("name") == "SEO_URL":
-                        seo_path = attr.get("values", [""])[0]
-                
-                link = f"https://www.willhaben.at/iad/{seo_path}"
-                msg = f"📺 Found matching TV Bank!\nPrice: {price}\n\n[Open Item]({link})"
-                send_telegram(msg)
-            
-            new_ids_to_save.append(ad_id)
-            time.sleep(1) # Small delay to be nice to the API
+            print(f">>> New item discovered: {ad_id}. Checking details...", flush=True)
+            # (Your detail-checking logic goes here)
+            # For now, let's just mark it as seen
+            with open("seen_ids.txt", "a") as f:
+                f.write(ad_id + "\n")
+            new_count += 1
+    
+    print(f">>> Script finished. Discovered {new_count} new items.", flush=True)
 
-    # 4. Update memory
-    if new_ids_to_save:
-        with open("seen_ids.txt", "a") as f:
-            for nid in new_ids_to_save:
-                f.write(nid + "\n")
-
-if __name__ == "__main__":
-    main()
+if _name_ == "_main_":
+    try:
+        main()
+    except Exception as e:
+        print(f">>> CRITICAL RUNTIME ERROR: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
