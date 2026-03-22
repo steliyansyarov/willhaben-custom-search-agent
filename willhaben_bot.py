@@ -3,7 +3,7 @@ import os
 import sys
 
 # --- CONFIGURATION ---
-API_URL = "https://www.willhaben.at/iad/searchmarket/api/v1/search"
+API_URL = "https://www.willhaben.at/api/iad/v1/adsearch"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Accept": "application/json",
@@ -50,6 +50,7 @@ def main():
             return
 
         data = response.json()
+        print(f"DEBUG: Found {len(data.get('feedItems', []))} total items in search.")
     except Exception as e:
         print(f"Failed to parse JSON: {e}")
         return
