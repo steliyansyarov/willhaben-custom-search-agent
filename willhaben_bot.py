@@ -42,7 +42,8 @@ def get_full_description(ad_id):
         response = requests.get(url, headers=HEADERS, timeout=10)
         if response.status_code == 200:
             data = response.json()
-            
+            log("DEBUG DATA FOR {ad_id}:")
+            log(json.dumps(data, indent=2))
             # Start with standard description/heading fields
             all_text = [
                 str(data.get("description", "")),
