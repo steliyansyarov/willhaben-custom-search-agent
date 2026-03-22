@@ -77,7 +77,7 @@ def main():
     
     print(f">>> Script finished. Discovered {new_count} new items.", flush=True)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     try:
         main()
     except Exception as e:
