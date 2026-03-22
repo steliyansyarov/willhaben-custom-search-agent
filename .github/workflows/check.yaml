@@ -25,7 +25,7 @@ jobs:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           PYTHONUNBUFFERED: "1" # Forces Python to print immediately
-        run: python willhaben_bot.py
+        run: python -u willhaben_bot.py
 
       - name: Commit state
         run: |
