@@ -28,7 +28,8 @@ CHAT_ID = os.getenv("TG_CHAT_ID")
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    requests.post(url, json=payload, timeout=10)
+    response = requests.post(url, json=payload, timeout=10)
+    print(f"DEBUG Telegram: Status {response.status_code}, Response: {response.text}")
 
 def get_full_description(ad_id):
     """Fetches the detail JSON and extracts the long description text."""
