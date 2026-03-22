@@ -31,5 +31,8 @@ jobs:
           git config --global user.name 'WillhabenBot'
           git config --global user.email 'bot@github.com'
           git add seen_ids.txt
+          # Pull latest changes from GitHub to avoid conflicts
+          git pull --rebase origin main
+          # Commit only if there are changes; || exit 0 prevents the build from failing if no new ads
           git commit -m "Update seen items" || exit 0
-          git push
+          git push origin main
