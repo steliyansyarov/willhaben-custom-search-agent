@@ -13,7 +13,7 @@ HEADERS = {
     "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile"
 }
 
-KEYWORDS = ["160"]
+KEYWORDS = ["150"]
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
 CHAT_ID = os.getenv("TG_CHAT_ID")
 
