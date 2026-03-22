@@ -34,6 +34,8 @@ def get_full_description(ad_id):
         response = requests.get(url, headers=HEADERS, timeout=10)
         if response.status_code == 200:
             data = response.json()
+            print(f">>> DEBUG DATA FOR {ad_id}:")
+            print(json.dumps(data, indent=2))
             all_text = [data.get("description", "")]
             attrs = data.get("attributes", {}).get("attribute", [])
             for a in attrs:
