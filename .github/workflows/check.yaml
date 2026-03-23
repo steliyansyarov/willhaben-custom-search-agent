@@ -2,7 +2,7 @@ name: Willhaben Watcher
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Every 20 minutes
+    - cron: '*/30 * * * *' # Every 30 minutes
   workflow_dispatch: # Allows manual trigger
 
 jobs:
@@ -31,13 +31,17 @@ jobs:
         run: |
           git config --global user.name 'WillhabenBot'
           git config --global user.email 'bot@github.com'
-          # 1. Stash the changes made by the Python script (seen_ids.txt)
-          git stash
-          # 2. Pull the latest state from the main branch
-          git pull --rebase origin main
-          # 3. Pop the changes back (re-applying the new IDs)
-          git stash pop || echo "No stash to apply"
-          # 4. Finalize the commit and push
+          
+          # Only proceed if seen_ids.txt was actually modified
+          if git diff --quiet seen_ids.txt; then
+            echo "No changes in seen_ids.txt. Skipping commit."
+            exit 0
+          fi
+
           git add seen_ids.txt
-          git commit -m "Update seen items" || exit 0
+          git stash
+          git pull --rebase origin main
+          git stash pop || echo "Nothing to pop"
+          git add seen_ids.txt
+          git commit -m "Update seen items [skip ci]" || exit 0
           git push origin main
