@@ -14,7 +14,10 @@ HEADERS = {
     "origin": "https://www.willhaben.at"
 }
 
-KEYWORDS = ["150x", "150 x", "150 cm", "150cm", "x150", "x 150"]
+KEYWORDS = [
+    "148", "148 x", "148 cm", "148cm", "x148", "x 148"
+    "150x", "150 x", "150 cm", "150cm", "x150", "x 150"
+]
 ROWS_PER_PAGE = 90
 
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
