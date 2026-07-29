@@ -4,7 +4,7 @@ import time
 import math
 
 # --- CONFIGURATION ---
-SEARCH_API_URL = "https://www.willhaben.at/webapi/ad-search/search/atz/5/301/atverz?rows=3&TOP_AD=topad_result&sort=11&b_treeAttributes=3214&b_areaId=900&b_keyword=sofa"
+SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/iad/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
 
 HEADERS = {
     "accept": "application/json",
