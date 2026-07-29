@@ -4,7 +4,7 @@ import time
 import math
 
 # --- CONFIGURATION ---
-SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/iad/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
+SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
 
 # Global query parameters — change "keyword" here to search for something else (e.g., "sofa")
 DEFAULT_PARAMS = {
