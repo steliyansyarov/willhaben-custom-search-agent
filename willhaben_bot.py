@@ -4,7 +4,15 @@ import time
 import math
 
 # --- CONFIGURATION ---
-SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
+SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/iad/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
+
+# Global query parameters — change "keyword" here to search for something else (e.g., "sofa")
+DEFAULT_PARAMS = {
+    "areaId": "900", # Vienna
+    "keyword": "sofa",
+    "rows": "90",
+    "isNavigation": "true"
+}
 
 HEADERS = {
     "accept": "application/json",
@@ -14,10 +22,10 @@ HEADERS = {
     "origin": "https://www.willhaben.at"
 }
 
+# Keywords to look for in the description of the item
 KEYWORDS = [
     "238", "238x"
 ]
-ROWS_PER_PAGE = 90
 
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
 CHAT_ID = os.getenv("TG_CHAT_ID")
@@ -44,13 +52,10 @@ def save_new_ids(new_ids, file_path="seen_ids.txt"):
 
 def fetch_search_page(page_number):
     """Performs the network request for a specific search page."""
-    params = {
-        "areaId": "900",
-        "keyword": "tv bank",
-        "rows": str(ROWS_PER_PAGE),
-        "page": str(page_number),
-        "isNavigation": "true"
-    }
+    # Copy global default params and add the dynamic page number
+    params = DEFAULT_PARAMS.copy()
+    params["page"] = str(page_number)
+    
     try:
         response = requests.get(SEARCH_API_URL, params=params, headers=HEADERS, timeout=15)
         response.raise_for_status()
@@ -63,7 +68,6 @@ def parse_ad_data(ad):
     """Extracts relevant fields (text, price, link) from a raw ad JSON object."""
     attributes = ad.get("attributes", {}).get("attribute", [])
     
-    # Initialize defaults
     content_to_search = str(ad.get("description", "")).lower()
     seo_url = ""
     price = "N/A"
@@ -117,15 +121,15 @@ def main():
     total_pages = 1
     new_ids_for_history = []
     matches_count = 0
+    rows_per_page = int(DEFAULT_PARAMS.get("rows", 90))
 
     while current_page <= total_pages:
         data = fetch_search_page(current_page)
         if not data: break
 
-        # Calculate total pages on the first request
         if current_page == 1:
             rows_found = data.get("rowsFound", 0)
-            total_pages = min(math.ceil(rows_found / ROWS_PER_PAGE), 15)
+            total_pages = min(math.ceil(rows_found / rows_per_page), 15)
             log(f"Total items: {rows_found}. Scanning {total_pages} pages.")
 
         ads = data.get("advertSummaryList", {}).get("advertSummary", [])
@@ -133,7 +137,6 @@ def main():
             ad = parse_ad_data(raw_ad)
             
             if ad["id"] not in seen_ids:
-                # Check if any keyword matches the combined text
                 if any(k in ad["search_text"] for k in KEYWORDS):
                     log(f"Match found! ID: {ad['id']}")
                     send_telegram_match(ad)
@@ -142,7 +145,7 @@ def main():
                 new_ids_for_history.append(ad["id"])
 
         current_page += 1
-        time.sleep(1) # Polite delay between pages
+        time.sleep(1)
 
     save_new_ids(new_ids_for_history)
     log(f"Scan finished. Notifications sent: {matches_count}")
