@@ -24,7 +24,7 @@ HEADERS = {
 
 # Keywords to look for in the description of the item
 KEYWORDS = [
-    "238", "236", "104", "105"
+    "240", "238", "236"
 ]
 
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
