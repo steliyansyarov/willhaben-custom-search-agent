@@ -5,11 +5,13 @@ import math
 
 # --- CONFIGURATION ---
 SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
+VIENNA_AREAID = "900"
+GLOBAL_SEARCH_KEYWORD = "sofa"
+DESCRIPTION_KEYWORDS = ["240", "238", "236"]
 
-# Global query parameters — change "keyword" here to search for something else (e.g., "sofa")
-DEFAULT_PARAMS = {
-    "areaId": "900", # Vienna
-    "keyword": "sofa",
+URL_DEFAULT_PARAMS = {
+    "areaId": VIENNA_AREAID,
+    "keyword": GLOBAL_SEARCH_KEYWORD,
     "rows": "90",
     "isNavigation": "true"
 }
@@ -21,11 +23,6 @@ HEADERS = {
     "referer": "https://www.willhaben.at/",
     "origin": "https://www.willhaben.at"
 }
-
-# Keywords to look for in the description of the item
-KEYWORDS = [
-    "240", "238", "236"
-]
 
 TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
 CHAT_ID = os.getenv("TG_CHAT_ID")
@@ -121,7 +118,7 @@ def main():
     total_pages = 1
     new_ids_for_history = []
     matches_count = 0
-    rows_per_page = int(DEFAULT_PARAMS.get("rows", 90))
+    rows_per_page = int(URL_DEFAULT_PARAMS.get("rows", 90))
 
     while current_page <= total_pages:
         data = fetch_search_page(current_page)
@@ -137,7 +134,7 @@ def main():
             ad = parse_ad_data(raw_ad)
             
             if ad["id"] not in seen_ids:
-                if any(k in ad["search_text"] for k in KEYWORDS):
+                if any(k in ad["search_text"] for k in DESCRIPTION_KEYWORDS):
                     log(f"Match found! ID: {ad['id']}")
                     send_telegram_match(ad)
                     matches_count += 1
