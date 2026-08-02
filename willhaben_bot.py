@@ -50,7 +50,7 @@ def save_new_ids(new_ids, file_path="seen_ids.txt"):
 def fetch_search_page(page_number):
     """Performs the network request for a specific search page."""
     # Copy global default params and add the dynamic page number
-    params = DEFAULT_PARAMS.copy()
+    params = URL_DEFAULT_PARAMS.copy()
     params["page"] = str(page_number)
     
     try:
