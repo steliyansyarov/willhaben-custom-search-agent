@@ -7,7 +7,7 @@ import math
 SEARCH_API_URL = "https://www.willhaben.at/webapi/iad/search/atz/seo/kaufen-und-verkaufen/marktplatz/sofas-sessel/sofagarnituren-couches-5747/a/farbe-beige-3214"
 VIENNA_AREAID = "900"
 GLOBAL_SEARCH_KEYWORD = "sofa"
-DESCRIPTION_KEYWORDS = ["240", "238", "236"]
+DESCRIPTION_KEYWORDS = ["240 x", "240x", "238 x", "238x", "236x", "236 x"]
 
 URL_DEFAULT_PARAMS = {
     "areaId": VIENNA_AREAID,
